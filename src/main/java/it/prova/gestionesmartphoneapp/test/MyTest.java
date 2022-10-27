@@ -19,17 +19,17 @@ public class MyTest {
 		try {
 
 			System.out.println(
-					"****************************** fine batteria di test ********************************************");
+					"****************************** inizio batteria di test ********************************************");
 			System.out.println(
 					"*************************************************************************************************");
-			System.out.println("In tabella Genere ci sono " + smartphoneService.listAll().size() + " elementi.");
-			System.out.println("In tabella Genere ci sono " + appService.listAll().size() + " elementi.");
+			System.out.println("In tabella Smartphone ci sono " + smartphoneService.listAll().size() + " elementi.");
+			System.out.println("In tabella App ci sono " + appService.listAll().size() + " elementi.");
 
 			testInserisciSmartphone(smartphoneService);
-			System.out.println("In tabella Genere ci sono " + smartphoneService.listAll().size() + " elementi.");
+			System.out.println("In tabella Smartphone ci sono " + smartphoneService.listAll().size() + " elementi.");
 
 			testInsertApp(appService);
-			System.out.println("In tabella Genere ci sono " + appService.listAll().size() + " elementi.");
+			System.out.println("In tabella App ci sono " + appService.listAll().size() + " elementi.");
 
 			testAggiornamentoApp(appService);
 
@@ -42,6 +42,14 @@ public class MyTest {
 			testDisinstallaApp(appService, smartphoneService);
 
 			testEliminaTelefonoAssociatoDueApp(smartphoneService, appService);
+			
+			System.out.println(
+					"****************************** fine batteria di test ********************************************");
+			System.out.println(
+					"*************************************************************************************************");
+			System.out.println("In tabella Smartphone ci sono " + smartphoneService.listAll().size() + " elementi.");
+			System.out.println("In tabella App ci sono " + appService.listAll().size() + " elementi.");
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -118,6 +126,9 @@ public class MyTest {
 
 		App nuovaApplicazione = new App("BaseCamp", new Date(), new Date(), "3.2.1");
 		appServiceInstance.inserisciNuovo(nuovaApplicazione);
+		
+		smartphoneServiceInstance.rimuovi(nuovoTelefono.getId());
+		appServiceInstance.rimuovi(nuovaApplicazione.getId());
 		System.out.println(
 				".......	private static void testInstallazioneDellApplicazione(SmartphoneService smartphoneServiceInstance, AppService appServiceInstance) throws Exception {\n"
 						+ " fine: PASSED.............");
@@ -202,6 +213,9 @@ public class MyTest {
 
 		App nuovaApplicazione = new App("BaseCamp", new Date(), new Date(), "3.2.1");
 		appServiceInstance.inserisciNuovo(nuovaApplicazione);
+		
+		App nuovaApplicazione1 = new App("BaseCamp", new Date(), new Date(), "3.2.1");
+		appServiceInstance.inserisciNuovo(nuovaApplicazione1);
 
 		if (nuovaApplicazione.getId() == null)
 			throw new RuntimeException("testDisinstallazioneApp FAILED: app non inserita! ");
@@ -223,6 +237,7 @@ public class MyTest {
 		// reset tabelle
 		smartphoneServiceInstance.rimuovi(nuovoTelefono.getId());
 		appServiceInstance.rimuovi(nuovaApplicazione.getId());
+		appServiceInstance.rimuovi(nuovaApplicazione1.getId());
 
 		System.out.println(".......testDisinstallazioneApp fine: PASSED.............");
 
