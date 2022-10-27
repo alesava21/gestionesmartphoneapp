@@ -40,7 +40,7 @@ public class Smartphone {
 	private LocalDateTime createDateTime;
 	@UpdateTimestamp
 	private LocalDateTime updateDateTime;
-	
+
 	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
 	@JoinTable(name = "smartphone_app", joinColumns = @JoinColumn(name = "smartphone_id", referencedColumnName = "ID"), inverseJoinColumns = @JoinColumn(name = "app_id", referencedColumnName = "ID"))
 	private Set<App> apps = new HashSet<App>();
@@ -119,6 +119,14 @@ public class Smartphone {
 
 	public void setUpdateDateTime(LocalDateTime updateDateTime) {
 		this.updateDateTime = updateDateTime;
+	}
+
+	public Set<App> getApps() {
+		return apps;
+	}
+
+	public void setApps(Set<App> apps) {
+		this.apps = apps;
 	}
 
 }

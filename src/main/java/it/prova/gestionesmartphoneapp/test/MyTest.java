@@ -34,8 +34,14 @@ public class MyTest {
 			testAggiornamentoApp(appService);
 
 			testAggiornaSistemaOperativo(smartphoneService);
-			
+
 			testInstallazioneDellApplicazione(smartphoneService, appService);
+
+			testInstallazioneApp(appService, smartphoneService);
+
+			testDisinstallaApp(appService, smartphoneService);
+
+			testEliminaTelefonoAssociatoDueApp(smartphoneService, appService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -51,7 +57,7 @@ public class MyTest {
 		if (nuovoSmartphone.getId() == null) {
 			throw new RuntimeException("testInserimentoNuovoCd fallito ");
 		}
-		smartphoneServiceInstance.rimuovi(nuovoSmartphone);
+		smartphoneServiceInstance.rimuovi(nuovoSmartphone.getId());
 		System.out.println(".......testInserisciSmartphone fine: PASSED.............");
 	}
 
@@ -62,7 +68,7 @@ public class MyTest {
 		if (nuovApp.getId() == null) {
 			throw new RuntimeException("testAggiornamentoApp failed.");
 		}
-		appServiceInstance.rimuovi(nuovApp);
+		appServiceInstance.rimuovi(nuovApp.getId());
 		System.out.println(".......testInsertApp fine: PASSED.............");
 	}
 
@@ -81,7 +87,7 @@ public class MyTest {
 				|| !(appServiceInstance.caricaSingoloElemento(nuovaApp.getId()).getDataUltimoAggiornamento()
 						.compareTo(nuovaData) == 0))
 			throw new RuntimeException("testAggiornamentoApp failed.");
-		appServiceInstance.rimuovi(nuovaApp);
+		appServiceInstance.rimuovi(nuovaApp.getId());
 		System.out.println(".......testAggiornamentoApp fine: PASSED.............");
 	}
 
@@ -99,7 +105,7 @@ public class MyTest {
 				.equals("14.1.2")) {
 			throw new RuntimeException("testAggiornamentoSistemaOperativo failed.");
 		}
-		smartphoneServiceInstance.rimuovi(nuovoSmartphone);
+		smartphoneServiceInstance.rimuovi(nuovoSmartphone.getId());
 		System.out.println(".......testAggiornaSistemaOperativo fine: PASSED.............");
 	}
 
@@ -117,4 +123,108 @@ public class MyTest {
 						+ " fine: PASSED.............");
 	}
 
+	private static void testInstallazioneApp(AppService appServiceInstance, SmartphoneService smartphoneServiceInstance)
+			throws Exception {
+		System.out.println(".......testInstallazioneApp inizio.............");
+
+		Smartphone nuovoTelefono = new Smartphone("Apple", "Iphone", 1400, "14.3.4");
+		smartphoneServiceInstance.inserisciNuovo(nuovoTelefono);
+
+		if (nuovoTelefono.getId() == null)
+			throw new RuntimeException("testAggiornamentoVersioneOSSmartphone fallito: smartphone non inserito. ");
+
+		App nuovaApplicazione = new App("BaseCamp", new Date(), new Date(), "3.2.1");
+		appServiceInstance.inserisciNuovo(nuovaApplicazione);
+
+		if (nuovaApplicazione.getId() == null)
+			throw new RuntimeException("testAggiornamentoVersioneAppEDataAggiornamento FAILED: app non inserita! ");
+
+		smartphoneServiceInstance.aggiungiApp(nuovoTelefono, nuovaApplicazione);
+
+		Smartphone smartphoneReloaded = smartphoneServiceInstance.caricaSingoloElementoEagerApps(nuovoTelefono.getId());
+
+		if (smartphoneReloaded.getApps().isEmpty())
+			throw new RuntimeException("testInstallazioneApp FAILED: installazione non avvenuta correttamente.");
+
+		smartphoneServiceInstance.rimuoviTuttiGliSmartphoneDallaTabellaDiJoin();
+		smartphoneServiceInstance.rimuovi(nuovoTelefono.getId());
+		appServiceInstance.rimuovi(nuovaApplicazione.getId());
+
+		System.out.println(".......testInstallazioneApp fine: PASSED.............");
+
+	}
+
+	private static void testDisinstallaApp(AppService appServiceInstance, SmartphoneService smartphoneServiceInstance)
+			throws Exception {
+		System.out.println(".......testDisinstallazioneApp inizio.............");
+
+		Smartphone nuovoTelefono = new Smartphone("Apple", "Iphone", 1400, "14.3.4");
+		smartphoneServiceInstance.inserisciNuovo(nuovoTelefono);
+
+		if (nuovoTelefono.getId() == null)
+			throw new RuntimeException("testDisinstallazioneApp fallito: smartphone non inserito. ");
+
+		App nuovaApplicazione = new App("BaseCamp", new Date(), new Date(), "3.2.1");
+		appServiceInstance.inserisciNuovo(nuovaApplicazione);
+
+		if (nuovaApplicazione.getId() == null)
+			throw new RuntimeException("testDisinstallazioneApp FAILED: app non inserita! ");
+
+		smartphoneServiceInstance.aggiungiApp(nuovoTelefono, nuovaApplicazione);
+
+		Smartphone smartphoneReloaded = smartphoneServiceInstance.caricaSingoloElementoEagerApps(nuovoTelefono.getId());
+
+		if (smartphoneReloaded.getApps().isEmpty())
+			throw new RuntimeException("testDisinstallazioneApp FAILED: installazione non avvenuta correttamente.");
+
+		appServiceInstance.rimuoviAppDallaTabellaDiJoin(nuovaApplicazione.getId());
+		smartphoneReloaded = smartphoneServiceInstance.caricaSingoloElementoEagerApps(nuovoTelefono.getId());
+
+		if (!smartphoneReloaded.getApps().isEmpty())
+			throw new RuntimeException("testDisinstallazioneApp FAILED: disinstallazione non avvenuta correttamente.");
+
+		// reset tabelle
+		smartphoneServiceInstance.rimuovi(nuovoTelefono.getId());
+		appServiceInstance.rimuovi(nuovaApplicazione.getId());
+
+		System.out.println(".......testDisinstallazioneApp fine: PASSED.............");
+	}
+
+	private static void testEliminaTelefonoAssociatoDueApp(SmartphoneService smartphoneServiceInstance,
+			AppService appServiceInstance) throws Exception {
+		System.out.println(".......testDisinstallazioneApp inizio.............");
+
+		Smartphone nuovoTelefono = new Smartphone("Apple", "Iphone", 1400, "14.3.4");
+		smartphoneServiceInstance.inserisciNuovo(nuovoTelefono);
+
+		if (nuovoTelefono.getId() == null)
+			throw new RuntimeException("testDisinstallazioneApp fallito: smartphone non inserito. ");
+
+		App nuovaApplicazione = new App("BaseCamp", new Date(), new Date(), "3.2.1");
+		appServiceInstance.inserisciNuovo(nuovaApplicazione);
+
+		if (nuovaApplicazione.getId() == null)
+			throw new RuntimeException("testDisinstallazioneApp FAILED: app non inserita! ");
+
+		smartphoneServiceInstance.aggiungiApp(nuovoTelefono, nuovaApplicazione);
+
+		Smartphone smartphoneReloaded = smartphoneServiceInstance.caricaSingoloElementoEagerApps(nuovoTelefono.getId());
+
+		if (smartphoneReloaded.getApps().isEmpty())
+			throw new RuntimeException("testDisinstallazioneApp FAILED: installazione non avvenuta correttamente.");
+
+		appServiceInstance.rimuoviAppDallaTabellaDiJoin(nuovaApplicazione.getId());
+
+		smartphoneReloaded = smartphoneServiceInstance.caricaSingoloElementoEagerApps(nuovoTelefono.getId());
+
+		if (!smartphoneReloaded.getApps().isEmpty())
+			throw new RuntimeException("testDisinstallazioneApp FAILED: disinstallazione non avvenuta correttamente.");
+
+		// reset tabelle
+		smartphoneServiceInstance.rimuovi(nuovoTelefono.getId());
+		appServiceInstance.rimuovi(nuovaApplicazione.getId());
+
+		System.out.println(".......testDisinstallazioneApp fine: PASSED.............");
+
+	}
 }
